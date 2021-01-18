@@ -3,7 +3,7 @@ const knex = require('../config/database');
 knex.schema.createTable('team', (table) => {
     table.increments('id');
     table.string('name');
-    table.string('team_id');
+    table.integer('team_id');
     table.string('short_name');
 }).then(() => {
     console.log("team table created");
