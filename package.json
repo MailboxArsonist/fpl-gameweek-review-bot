@@ -1,0 +1,15 @@
+{
+  "name": "fpl-gameweek-review-bot",
+  "version": "1.0.0",
+  "description": "A bot that post the rate ___ this gameweek on r/fantasypremierleague",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Matthew Dodd",
+  "license": "ISC",
+  "dependencies": {
+    "knex": "^0.21.16",
+    "mysql": "^2.18.1"
+  }
+}
