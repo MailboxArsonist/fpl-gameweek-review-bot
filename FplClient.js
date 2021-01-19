@@ -16,6 +16,11 @@ class FplClient {
         return data;
     }
 
+    async getFixtures() {
+        const data = await this.request(FPL_FIXTURE_URL);
+        return data;
+    }
+
     request(url, params) {
         return new Promise ((resolve, reject) => {
             https.get(url, res => {
