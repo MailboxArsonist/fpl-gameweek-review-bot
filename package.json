@@ -11,6 +11,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "knex": "^0.21.16",
+    "minimist": "^1.2.5",
     "mysql": "^2.18.1"
   }
 }
