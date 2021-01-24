@@ -1,4 +1,5 @@
 const { exec } = require("child_process");
+const knex = require('./config/database');
 
 class Schedule {
 
@@ -10,21 +11,26 @@ class Schedule {
 
     getGameweeks() {
         return new Promise ((resolve, reject) => {
-            setTimeout(() => {
-                this.dates = ['2021-02-13 13:00:02', '2021-02-14 13:30:00']
-                resolve();
-            }, 1000);
+            knex('gameweek')
+                .then(rows => {
+                    this.dates = rows;
+                    resolve();
+                })
+                .catch(err => {
+                    console.error(err);
+                    reject(err);
+                });
         });
     }
 
     createSchedule() {
-        this.dates.forEach(date => {
-            const dateString = this.buildDateString(new Date(date));
-            const cmd = 'node ' + __dirname + '/command/reddit/PostGameweek.js --gw=69';
+        this.dates.forEach(({deadline_time, gameweek_id}) => {
+            const dateString = this.buildDateString(new Date(deadline_time));
+            const cmd = 'node ' + __dirname + `/command/reddit/PostGameweek.js --gw=${gameweek_id}`;
         
             exec(`${cmd} | at -t ${dateString}`, (error, stdout, stderr) => {
                 if (error) {
-                    console.log(`error: ${error.message}`);
+                    console.error(`error: ${error.message}`);
                     return;
                 }
                 if (stderr) {
