@@ -13,25 +13,25 @@ class CreateGameweek {
      */
     constructor(gwTitle, gwBody) {
         this.initRedditWrapper();
+        this.initEventHandlers();
         this.gameweekId = argv.gw;
         this.title = gwTitle;
         this.body = gwBody;
-        Event.on('team.start', (index) => {
-            this.postTeam(this.mappedTeamsWithPlayers[index], index);
-        });
-        Event.on('team.done', (index) => {
-            if(index < this.mappedTeamsWithPlayers.length) {
-                this.postTeam(this.mappedTeamsWithPlayers[index], index);
-                return;
-            }
-            console.log(`Finished, ${this.mappedTeamsWithPlayers.length} teams posted`);
-        });
+
+    }
+
+    /**
+     * inits events
+     */
+    initEventHandlers() {
+        Event.on('team.start', this.handleTeamSubmission);
+        Event.on('team.done', this.handleTeamSubmission);
     }
 
     /**
      * inits the reddit snoowrap wrapper
      */
-    initRedditWrapper(){
+    initRedditWrapper() {
         this.redditWrapper = new snoowrap({
             userAgent: process.env.REDDIT_USERAGENT,
             clientId: process.env.REDDIT_APP,
@@ -44,7 +44,7 @@ class CreateGameweek {
     /**
      * post the gameweek onto subreddit
      */
-    async postGameweek(){
+    async postGameweek() {
         const { post_id } = await this.getGameweek(this.gameweekId);
         const fixtures = await this.getFixturesWithTeams(this.gameweekId);
 
@@ -80,7 +80,7 @@ class CreateGameweek {
      * @param {array} players - the players
      * @param {int} index - current index of team
      */
-    postTeam({team, players}, index){
+    postTeam({team, players}, index) {
 
         setTimeout(() => {
 
@@ -104,10 +104,14 @@ class CreateGameweek {
             });
             
         }, 5000);
-
     }
 
-    setGameweekRedditPost(gameweekId, postId){
+    /**
+     * Sets the GW row with reddit submission ID
+     * @param {int} gameweekId - id of the gameweek
+     * @param {string} postId - id of the post
+     */
+    setGameweekRedditPost(gameweekId, postId) {
         knex('gameweek')
             .where('gameweek_id', '=', gameweekId)
             .update({ 'post_id': postId })
@@ -120,7 +124,7 @@ class CreateGameweek {
      * @returns {promise}
      * @param {int} gameweekId - id of the gameweek
      */
-    getGameweek(gameweekId){
+    getGameweek(gameweekId) {
         return new Promise ((resolve, reject) => {
             knex('gameweek')
                 .where('gameweek_id', '=', gameweekId)
@@ -139,7 +143,7 @@ class CreateGameweek {
      * @returns {promise}
      * @param {int} gameweekId - id of the gameweek
      */
-    getFixturesWithTeams(gameweekId){
+    getFixturesWithTeams(gameweekId) {
         return new Promise ((resolve, reject) => {
             knex('fixture')
                 .select(
@@ -176,7 +180,7 @@ class CreateGameweek {
      * @returns {promise}
      * @param {object} team - the player plays for this team
      */
-    getPlayersByTeam(team){
+    getPlayersByTeam(team) {
         return new Promise ((resolve, reject) => {
             knex('player')
                 .select(
@@ -214,6 +218,20 @@ class CreateGameweek {
      */
     getCurrentSeason(firstGWDate, lastGWDate){
         return `(${firstGWDate.getFullYear()}/${lastGWDate.getFullYear()})`;
+    }
+
+    /**
+     * Handles team submission event
+     * @param {int} index - the index of current team iteration
+     * @returns {bool}
+     */
+    handleTeamSubmission(index) {
+        if(index < this.mappedTeamsWithPlayers.length) {
+            this.postTeam(this.mappedTeamsWithPlayers[index], index);
+            return true;
+        }
+        console.log(`Finished, ${this.mappedTeamsWithPlayers.length} teams posted`);
+        return false;
     }
 }
 
