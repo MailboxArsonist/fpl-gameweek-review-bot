@@ -4,6 +4,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const { title, body } = require('../../content.json');
 const EventEmitter = require('events').EventEmitter;
 const Event = new EventEmitter();
+const { PLAYER_MINIMUM_MINUTES, PLAYER_STATUS_OK, PLAYER_STATUS_MINOR } = require('../../constants/playerStatus');
 require('dotenv').config();
 
 class CreateGameweek {
@@ -177,6 +178,7 @@ class CreateGameweek {
     }
 
     /**
+     * gets the players that play for this team, criteria is > 90 mins played this season (will need to find a better solution for start of next season) also filter out the injured players
      * @returns {promise}
      * @param {object} team - the player plays for this team
      */
@@ -188,6 +190,8 @@ class CreateGameweek {
                     'team_id'
                 )
                 .where('team_id', '=', team.id)
+                .whereIn('status', [ PLAYER_STATUS_OK, PLAYER_STATUS_MINOR ])
+                .andWhere('minutes', '>=', PLAYER_MINIMUM_MINUTES)
                 .then(players => {
                     resolve({
                         team,
