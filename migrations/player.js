@@ -7,6 +7,8 @@ knex.schema.createTable('player', (table) => {
     table.string('web_name');
     table.integer('team_id');
     table.integer('player_id');
+    table.integer('minutes');
+    table.string('status');
 }).then(() => {
     console.log("player table created");
 })
