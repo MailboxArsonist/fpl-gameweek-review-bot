@@ -10,7 +10,9 @@ const knex = require('../config/database');
         first_name: player.first_name,
         second_name: player.second_name,
         team_id: player.team,
-        player_id: player.id
+        player_id: player.id,
+        minutes: player.minutes,
+        status: player.status,
     }));
     
     knex('player')
