@@ -54,7 +54,10 @@ class CreateGameweek {
             throw new Error(`GW ${this.gameweekId} has already been posted on subreddit with the ID: ${post_id}`);
         }
 
-        const formattedTitle = this.title.replace('%GW%', this.gameweekId).replace('%SEASON%', '(2020/2021)');
+        // get first and last GW dates
+        const { first_gameweek_date, last_gameweek_date } = await this.getFirstAndLastGameweekDates();
+        
+        const formattedTitle = this.getCurrentSeason(first_gameweek_date, last_gameweek_date);
 
         // post onto subreddit
         const submission = await this.redditWrapper.getSubreddit('fpl_test_bot').submitSelfpost({
@@ -197,6 +200,26 @@ class CreateGameweek {
                         team,
                         players,
                     });
+                })
+                .catch(err => {
+                    console.error(err);
+                    reject(err);
+                });
+        });
+    }
+
+    /**
+     * gets the min and max gw dates
+     * @returns {promise}
+     */
+    getFirstAndLastGameweekDates() {
+        return new Promise ((resolve, reject) => {
+            knex('gameweek')
+                .min('deadline_time as first_gameweek_date')
+                .max('deadline_time as last_gameweek_date')
+                .first()
+                .then(gameweek => {
+                    resolve(gameweek);
                 })
                 .catch(err => {
                     console.error(err);
